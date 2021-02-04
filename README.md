@@ -1,8 +1,23 @@
 # twitch-mybot
-My Twitch Bot.
+My Twitch Bot. For every function you can set a cooldown, so user aren't able to spam a command.
 
 ## Functions
 - Remove links from chat (`!permit [username] [duration]`)
+- `!echo` Repeats the message
+- `!uhr` Writes the kurrent time
+- `!debug` Writes some debug-lines in the chat
+- `!social` Show links to socialmedia sites
+
+### Aliases
+- `!uhr`
+    - `!uhrzeit`
+- `!social`
+    - `!hp`
+    - `!socials`
+    - `!website`
+    - `!webseite`
+    - `!homepage`
+
 
 ## Setup
 Clone repository: `git clone git@github.com:EchtkPvL/twitch-mybot.git`
