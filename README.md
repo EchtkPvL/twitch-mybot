@@ -3,6 +3,7 @@ My Twitch Bot. For every function you can set a cooldown, so user aren't able to
 
 ## Functions
 - Remove links from chat (`!permit [username] [duration]`)
+- Remove messages that contain more than 90% capitalized letters (emotes doesn't count)
 - `!echo` Repeats the message
 - `!uhr` Writes the kurrent time
 - `!debug` Writes some debug-lines in the chat

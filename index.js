@@ -2,7 +2,7 @@
  * NodeJS Twitch Permit-Bot via tmi.js
  *
  * @author    Jonas Berner <admin@jonas-berner.de>
- * @version   1.0.3
+ * @version   1.0.4
  * @copyright 04.02.2021 Jonas Berner
  */
 console.log(`EchtkPvL Twitch Permit-Bot (NodeJS ${process.version})`);
@@ -69,6 +69,7 @@ client.on('message', (channel, userstate, message, self) => {
 
     check_link(channel, userstate, message, self); // Link-Protection
     commands(channel, userstate, message, self);
+    checkCaptials(channel, userstate, message, self);
 });
 
 // ---------------------------
@@ -84,14 +85,20 @@ function commands(channel, userstate, message, self) {
 
     if(
         (!isNaN(timer_obj[user + command]) && new Date().getTime() < timer_obj[user + command])
-        || (!isNaN(timer_obj[user + "uhr"]) && new Date().getTime() < timer_obj[user + "uhr"])
-        || (!isNaN(timer_obj[user + "social"]) && new Date().getTime() < timer_obj[user + "social"])
+        || (!isNaN(timer_obj[command]) && new Date().getTime() < timer_obj[command])
+        || (!isNaN(timer_obj[user]) && new Date().getTime() < timer_obj[user])
     ){
-        client.say(channel, `@${user} youre on cooldown!`);
+        client.say(channel, `@${user} you are on cooldown!`);
         return;
     }
 
     switch(command){
+        case "help":
+        case "commands":
+            timer_obj[command] = new Date().getTime() + (15 * 1000);
+            client.say(channel, `Commands: !echo !debug !uhr !social`);
+            break;
+
         case "permit":
             cmd_permit(channel, userstate, message, self, args, command);
             break;
@@ -109,7 +116,7 @@ function commands(channel, userstate, message, self) {
         case "uhr":
         case "uhrzeit":
             uhrzeit = new Date().toISOString().replace(/\d{4}-\d{2}-\d{2}T/, '').replace(/\..+/, '');
-            timer_obj[user + "uhr"] = new Date().getTime() + (10 * 1000);
+            timer_obj[user + command] = new Date().getTime() + (10 * 1000);
             client.say(channel, `Hi ${user}, hier die Uhrzeit: ${uhrzeit}`);
             break;
 
@@ -119,6 +126,11 @@ function commands(channel, userstate, message, self) {
         case "website":
         case "webseite":
         case "homepage":
+            if(!isNaN(timer_obj[user + "social"]) && new Date().getTime() < timer_obj[user + "social"]){
+                client.say(channel, `@${user} you are on cooldown!`);
+                return;
+            }
+
             timer_obj[user + "social"] = new Date().getTime() + (30 * 1000);
             client.action(channel, `Homepage: https://echtkpvl.de - Twitter: https://twitter.com/EchtkPvL - GitHub: https://github.com/EchtkPvL - Insta: https://www.instagram.com/echtkpvl`);
             break;
@@ -150,6 +162,29 @@ function cmd_permit(channel, userstate, message, self, args, command) {
     permit_obj[user] = new Date().getTime() + (delay * 1000);
 
     client.say(channel, `@${user} you are now permited to post links for ${delay} seconds`);
+}
+
+function checkCaptials(channel, userstate, message, self) {
+    var count = message.replace(/\s/g, '').length;
+    var countRaw = message.replace(/\s/g, '').length;
+    var countCapitals = 0;
+
+    for (const key in userstate['emotes']){
+        for (const value in userstate['emotes'][key]){
+            emote = userstate['emotes'][key][value].split('-');
+            start = parseInt(emote[0]);
+            end = parseInt(emote[1]);
+            tmp = message.substr(start, (end - start) + 1);
+            countRaw -= tmp.replace(/\s/g, '').length;
+            countCapitals -= tmp.length - tmp.replace(/[A-Z]/g, '').length;
+        }
+    }
+
+    countCapitals += count - message.replace(/\s/g, '').replace(/[A-Z]/g, '').length;
+    if((countCapitals / countRaw) >= 0.9 && countRaw >= 10){
+        client.deletemessage(channel, userstate.id);
+        client.action(channel, `@${userstate['display-name']} stop spamming caps!`);
+    }
 }
 
 setInterval(() => {
