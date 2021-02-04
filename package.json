@@ -1,0 +1,19 @@
+{
+    "name": "twitch-mybot",
+    "version": "1.0.1",
+    "description": "NodeJS Twitch Permit-Bot via tmi.js",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo 'No test specified' && exit 0",
+        "start": "node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:EchtkPvL/twitch-permit-bot.git"
+    },
+    "author": "EchtkPvL",
+    "license": "MIT",
+    "dependencies": {
+        "tmi.js": "1.7.x"
+    }
+}

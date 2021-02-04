@@ -1,0 +1,9 @@
+module.exports = {
+    username: 'EchtkPvL',
+    token: 'oauth:abcdefghijklmnopqrstuvwxyz1234',
+    channels: [
+       'EchtkPvL',
+       'EchtkPvLBot',
+
+    ]
+}
