@@ -2,7 +2,7 @@
  * NodeJS Twitch Permit-Bot via tmi.js
  *
  * @author    Jonas Berner <admin@jonas-berner.de>
- * @version   1.0.4
+ * @version   1.0.5
  * @copyright 04.02.2021 Jonas Berner
  */
 console.log(`EchtkPvL Twitch Permit-Bot (NodeJS ${process.version})`);
@@ -101,6 +101,11 @@ function commands(channel, userstate, message, self) {
 
         case "permit":
             cmd_permit(channel, userstate, message, self, args, command);
+            break;
+
+        case "false":
+            timer_obj[user + command] = new Date().getTime() + (15 * 1000);
+            client.say(channel, `It's funny because it's true :D @${user}`);
             break;
 
         case "echo":
