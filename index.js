@@ -2,12 +2,13 @@
  * NodeJS Twitch Permit-Bot via tmi.js
  *
  * @author    Jonas Berner <admin@jonas-berner.de>
- * @version   1.0.2
+ * @version   1.0.3
  * @copyright 04.02.2021 Jonas Berner
  */
 console.log(`EchtkPvL Twitch Permit-Bot (NodeJS ${process.version})`);
 let tmi, client;
 var config;
+var timer_obj = [];
 var permit_obj = [];
 let { Resolver } = require('dns').promises;
 let dns = new Resolver({'timeout': 750});
@@ -79,6 +80,16 @@ function commands(channel, userstate, message, self) {
 
     const args = message.slice(1).split(' ');
     const command = args.shift().toLowerCase();
+    const user = userstate['display-name'];
+
+    if(
+        (!isNaN(timer_obj[user + command]) && new Date().getTime() < timer_obj[user + command])
+        || (!isNaN(timer_obj[user + "uhr"]) && new Date().getTime() < timer_obj[user + "uhr"])
+        || (!isNaN(timer_obj[user + "social"]) && new Date().getTime() < timer_obj[user + "social"])
+    ){
+        client.say(channel, `@${user} youre on cooldown!`);
+        return;
+    }
 
     switch(command){
         case "permit":
@@ -86,14 +97,37 @@ function commands(channel, userstate, message, self) {
             break;
 
         case "echo":
-            client.say(channel, `@${userstate.username}, you said: "${args.join(' ')}"`);
+            timer_obj[user + command] = new Date().getTime() + (15 * 1000);
+            client.say(channel, `@${user}, you said: "${args.join(' ')}"`);
+            break;
+
+        case "debug":
+            timer_obj[user + command] = new Date().getTime() + (60 * 1000);
+            client.say(channel, JSON.stringify(userstate));
+            break;
+
+        case "uhr":
+        case "uhrzeit":
+            uhrzeit = new Date().toISOString().replace(/\d{4}-\d{2}-\d{2}T/, '').replace(/\..+/, '');
+            timer_obj[user + "uhr"] = new Date().getTime() + (10 * 1000);
+            client.say(channel, `Hi ${user}, hier die Uhrzeit: ${uhrzeit}`);
+            break;
+
+        case "hp":
+        case "social":
+        case "socials":
+        case "website":
+        case "webseite":
+        case "homepage":
+            timer_obj[user + "social"] = new Date().getTime() + (30 * 1000);
+            client.action(channel, `Homepage: https://echtkpvl.de - Twitter: https://twitter.com/EchtkPvL - GitHub: https://github.com/EchtkPvL - Insta: https://www.instagram.com/echtkpvl`);
             break;
 
         default:
             return false;
     }
 
-    console.log(`[${channel}][CMD] ${userstate['display-name']}: ${message}`);
+    console.log(`[${channel}][CMD] ${user}: ${message}`);
 }
 
 function cmd_permit(channel, userstate, message, self, args, command) {
@@ -122,6 +156,10 @@ setInterval(() => {
     for (const property in permit_obj)
         if(new Date().getTime() >= permit_obj[property])
             delete permit_obj[property];
+
+    for (const property in timer_obj)
+        if(new Date().getTime() >= timer_obj[property])
+            delete timer_obj[property];
 }, 30 * 60 * 1000);
 
 async function check_link(channel, userstate, message, self) {
