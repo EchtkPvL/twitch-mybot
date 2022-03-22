@@ -66,6 +66,7 @@ process.on('SIGINT', function() {
 // ---------------------------
 client.on('message', (channel, userstate, message, self) => {
     if(self) return;
+    if(userstate["message-type"] == "whisper") return;
 
     check_link(channel, userstate, message, self); // Link-Protection
     commands(channel, userstate, message, self);
@@ -76,7 +77,6 @@ client.on('message', (channel, userstate, message, self) => {
 // Functions
 // ---------------------------
 function commands(channel, userstate, message, self) {
-    if(userstate["message-type"] == "whisper") return;
     if(!message.startsWith('!') && !message.startsWith('#')) return;
 
     const args = message.slice(1).split(' ');
@@ -116,6 +116,11 @@ function commands(channel, userstate, message, self) {
         case "debug":
             timer_obj[user + command] = new Date().getTime() + (60 * 1000);
             client.say(channel, JSON.stringify(userstate));
+            break;
+
+        case "sounds":
+            timer_obj[user + command] = new Date().getTime() + (60 * 1000);
+            client.say(channel, "https://jvpeek.de/ext/sb/soundlist/?channel=echtkpvl");
             break;
 
         case "uhr":
